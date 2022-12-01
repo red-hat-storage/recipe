@@ -9,13 +9,9 @@ metadata:
 spec:
   group: ramendr.openshift.io
   names:
-    categories:
-    - isf
     kind: Recipe
     listKind: RecipeList
     plural: recipes
-    shortNames:
-    - frcpe
     singular: recipe
   scope: Namespaced
   versions:

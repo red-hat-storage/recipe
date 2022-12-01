@@ -149,7 +149,6 @@ type RecipeStatus struct {
 }
 
 //+kubebuilder:object:root=true
-//+kubebuilder:resource:categories="isf",shortName="frcpe"
 //+kubebuilder:subresource:status
 
 // Recipe is the Schema for the recipes API
