@@ -6,4 +6,14 @@ plugins:
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: recipe
 repo: github.com/ramendr/recipe
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: openshift.io
+  group: ramendr
+  kind: Recipe
+  path: github.com/ramendr/recipe/api/v1alpha1
+  version: v1alpha1
 version: "3"
