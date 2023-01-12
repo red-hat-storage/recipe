@@ -19,10 +19,16 @@ type RecipeSpec struct {
 	// match the name of the app CR)
 	AppType string `json:"appType"`
 	// List of one or multiple groups
+	//+listType=map
+	//+listMapKey=name
 	Groups []*Group `json:"groups"`
 	// List of one or multiple hooks
+	//+listType=map
+	//+listMapKey=name
 	Hooks []*Hook `json:"hooks,omitempty"`
 	// Workflow is the sequence of actions to take
+	//+listType=map
+	//+listMapKey=name
 	Workflows []*Workflow `json:"workflows"`
 }
 
@@ -107,8 +113,12 @@ type Hook struct {
 	// Default timeout in seconds applied to custom and built-in operations. If not specified, equals to 30s.
 	Timeout int `json:"timeout,omitempty"`
 	// Set of operations that the hook can be invoked for
+	//+listType=map
+	//+listMapKey=name
 	Ops []*Operation `json:"ops,omitempty"`
 	// Set of checks that the hook can apply
+	//+listType=map
+	//+listMapKey=name
 	Chks []*Check `json:"chks,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
