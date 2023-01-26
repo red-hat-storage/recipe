@@ -192,7 +192,9 @@ spec:
                         properties:
                           command:
                             description: The command to execute
-                            type: string
+                            items:
+                              type: string
+                            type: array
                           container:
                             description: The container where the command should be
                               executed
