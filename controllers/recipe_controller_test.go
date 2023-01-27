@@ -7,14 +7,18 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	validationErrors "k8s.io/kube-openapi/pkg/validation/errors"
 
 	Recipe "github.com/ramendr/recipe/api/v1alpha1"
 )
 
 var (
 	testNamespace         *corev1.Namespace
-	testNamespaceNameBase string = "recipe-test-ns"
+	testNamespaceNameBase = "recipe-test-ns"
 )
 
 var _ = Describe("RecipeController", func() {
@@ -133,8 +137,22 @@ var _ = Describe("RecipeController", func() {
 
 			Expect(err).ToNot(BeNil())
 		})
-		It("allow unique Ops names", func() {
-			recipe := &Recipe.Recipe{
+		echoCommand := func(s string) []string {
+			return []string{"/bin/sh", "-c", "echo", s}
+		}
+		emptyCommand := func(string) []string {
+			return []string{}
+		}
+		hookOps := func(command func(string) []string, opNames ...string) []*Recipe.Operation {
+			ops := make([]*Recipe.Operation, len(opNames))
+			for i, opName := range opNames {
+				ops[i] = &Recipe.Operation{Name: opName, Command: command(opName)}
+			}
+
+			return ops
+		}
+		hookOpsRecipe := func(ops []*Recipe.Operation) *Recipe.Recipe {
+			return &Recipe.Recipe{
 				TypeMeta:   metav1.TypeMeta{Kind: "Recipe", APIVersion: "ramendr.openshift.io/v1alpha1"},
 				ObjectMeta: metav1.ObjectMeta{Name: "test-recipe", Namespace: testNamespace.Name},
 				Spec: Recipe.RecipeSpec{
@@ -143,49 +161,42 @@ var _ = Describe("RecipeController", func() {
 						{
 							Name: "hook-1",
 							Type: "exec",
-							Ops: []*Recipe.Operation{
-								{
-									Name: "op-1",
-								},
-								{
-									Name: "op-2",
-								},
-							},
+							Ops:  ops,
 						},
 					},
 					Workflows: []*Recipe.Workflow{},
 				},
 			}
+		}
+		It("error on empty command", func() {
+			recipe := hookOpsRecipe(hookOps(emptyCommand, "op-1"))
+			Expect(k8sClient.Create(context.TODO(), recipe)).To(MatchError(func() *errors.StatusError {
+				path := field.NewPath("spec", "hooks[0]", "ops[0]", "command")
+				value := 0
 
-			err := k8sClient.Create(context.TODO(), recipe)
+				return errors.NewInvalid(
+					schema.GroupKind{Group: Recipe.GroupVersion.Group, Kind: "Recipe"},
+					recipe.Name,
+					field.ErrorList{
+						field.Invalid(
+							path, value, validationErrors.TooFewItems(
+								path.String(),
+								"body",
+								1,
+								value,
+							).Error(),
+						),
+					},
+				)
+			}()))
+		})
+		It("allow unique Ops names", func() {
+			err := k8sClient.Create(context.TODO(), hookOpsRecipe(hookOps(echoCommand, "op-1", "op-2")))
 
 			Expect(err).To(BeNil())
 		})
 		It("error on duplicate Ops names", func() {
-			recipe := &Recipe.Recipe{
-				TypeMeta:   metav1.TypeMeta{Kind: "Recipe", APIVersion: "ramendr.openshift.io/v1alpha1"},
-				ObjectMeta: metav1.ObjectMeta{Name: "test-recipe", Namespace: testNamespace.Name},
-				Spec: Recipe.RecipeSpec{
-					Groups: []*Recipe.Group{},
-					Hooks: []*Recipe.Hook{
-						{
-							Name: "hook-1",
-							Type: "exec",
-							Ops: []*Recipe.Operation{
-								{
-									Name: "op-1",
-								},
-								{
-									Name: "op-1",
-								},
-							},
-						},
-					},
-					Workflows: []*Recipe.Workflow{},
-				},
-			}
-
-			err := k8sClient.Create(context.TODO(), recipe)
+			err := k8sClient.Create(context.TODO(), hookOpsRecipe(hookOps(echoCommand, "op-1", "op-1")))
 
 			Expect(err).ToNot(BeNil())
 		})

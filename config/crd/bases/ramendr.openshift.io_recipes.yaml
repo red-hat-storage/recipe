@@ -194,6 +194,7 @@ spec:
                             description: The command to execute
                             items:
                               type: string
+                            minItems: 1
                             type: array
                           container:
                             description: The container where the command should be
