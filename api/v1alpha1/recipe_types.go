@@ -53,7 +53,7 @@ type Group struct {
 	// List of resource types to exclude
 	ExcludedResourceTypes []string `json:"excludedResourceTypes,omitempty"`
 	// Select items based on label
-	LabelSelector string `json:"labelSelector,omitempty"`
+	LabelSelector metav1.LabelSelector `json:"labelSelector,omitempty"`
 	// If specified, resource's object name needs to match this expression. Valid for volume groups only.
 	NameSelector string `json:"nameSelector,omitempty"`
 	// Determines the resource type which the fields labelSelector and nameSelector apply to for selecting PVCs. Default selection is pvc. Valid for volume groups only.
@@ -64,7 +64,7 @@ type Group struct {
 	// included if they are associated with the included namespace-scoped resources
 	IncludeClusterResources *bool `json:"includeClusterResources,omitempty"`
 	// Selects namespaces by label
-	IncludedNamespacesByLabel string `json:"includedNamespacesByLabel,omitempty"`
+	IncludedNamespacesByLabel metav1.LabelSelector `json:"includedNamespacesByLabel,omitempty"`
 	// List of namespaces to include.
 	IncludedNamespaces []string `json:"includedNamespaces,omitempty"`
 	// List of namespace to exclude
@@ -100,7 +100,7 @@ type Hook struct {
 	// +kubebuilder:validation:Enum=pod;deployment;statefulset
 	SelectResource string `json:"selectResource,omitempty"`
 	// If specified, resource object needs to match this label selector
-	LabelSelector string `json:"labelSelector,omitempty"`
+	LabelSelector metav1.LabelSelector `json:"labelSelector,omitempty"`
 	// If specified, resource's object name needs to match this expression
 	NameSelector string `json:"nameSelector,omitempty"`
 	// Boolean flag that indicates whether to execute command on a single pod or on all pods that
