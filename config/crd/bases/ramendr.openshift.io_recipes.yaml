@@ -177,9 +177,9 @@ spec:
                               true. Defaults to Fail.
                             type: string
                           timeout:
-                            description: How long to wait for the check to execute,
-                              in seconds
-                            type: integer
+                            description: How long to wait for the check to execute
+                            format: duration
+                            type: string
                         required:
                         - name
                         type: object
@@ -281,9 +281,9 @@ spec:
                               exit code. Defaults to Fail.
                             type: string
                           timeout:
-                            description: How long to wait for the command to execute,
-                              in seconds
-                            type: integer
+                            description: How long to wait for the command to execute
+                            format: duration
+                            type: string
                         required:
                         - command
                         - name
@@ -304,9 +304,10 @@ spec:
                         command on a single pod or on all pods that match the selector
                       type: boolean
                     timeout:
-                      description: Default timeout in seconds applied to custom and
-                        built-in operations. If not specified, equals to 30s.
-                      type: integer
+                      description: Default timeout applied to custom and built-in
+                        operations. If not specified, equals to 30s.
+                      format: duration
+                      type: string
                     type:
                       description: Hook type
                       enum:
