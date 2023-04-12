@@ -56,11 +56,6 @@ spec:
                       description: Defaults to true, if set to false, a failure is
                         not necessarily handled as fatal
                       type: boolean
-                    excludedNamespaces:
-                      description: List of namespace to exclude
-                      items:
-                        type: string
-                      type: array
                     excludedResourceTypes:
                       description: List of resource types to exclude
                       items:
@@ -71,56 +66,6 @@ spec:
                         If nil or true, cluster-scoped resources are included if they
                         are associated with the included namespace-scoped resources
                       type: boolean
-                    includedNamespaces:
-                      description: List of namespaces to include.
-                      items:
-                        type: string
-                      type: array
-                    includedNamespacesByLabel:
-                      description: Selects namespaces by label
-                      properties:
-                        matchExpressions:
-                          description: matchExpressions is a list of label selector
-                            requirements. The requirements are ANDed.
-                          items:
-                            description: A label selector requirement is a selector
-                              that contains values, a key, and an operator that relates
-                              the key and values.
-                            properties:
-                              key:
-                                description: key is the label key that the selector
-                                  applies to.
-                                type: string
-                              operator:
-                                description: operator represents a key's relationship
-                                  to a set of values. Valid operators are In, NotIn,
-                                  Exists and DoesNotExist.
-                                type: string
-                              values:
-                                description: values is an array of string values.
-                                  If the operator is In or NotIn, the values array
-                                  must be non-empty. If the operator is Exists or
-                                  DoesNotExist, the values array must be empty. This
-                                  array is replaced during a strategic merge patch.
-                                items:
-                                  type: string
-                                type: array
-                            required:
-                            - key
-                            - operator
-                            type: object
-                          type: array
-                        matchLabels:
-                          additionalProperties:
-                            type: string
-                          description: matchLabels is a map of {key,value} pairs.
-                            A single {key,value} in the matchLabels map is equivalent
-                            to an element of matchExpressions, whose key field is
-                            "key", the operator is "In", and the values array contains
-                            only "value". The requirements are ANDed.
-                          type: object
-                      type: object
-                      x-kubernetes-map-type: atomic
                     includedResourceTypes:
                       description: List of resource types to include. If unspecified,
                         all resource types are included.
@@ -299,9 +244,6 @@ spec:
                       description: If specified, resource's object name needs to match
                         this expression
                       type: string
-                    namespace:
-                      description: Namespace
-                      type: string
                     onError:
                       default: fail
                       description: Default behavior in case of failing operations
@@ -374,7 +316,6 @@ spec:
                       type: string
                   required:
                   - name
-                  - namespace
                   - type
                   type: object
                 type: array
