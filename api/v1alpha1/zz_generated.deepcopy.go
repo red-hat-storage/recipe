@@ -236,6 +236,11 @@ func (in *RecipeSpec) DeepCopyInto(out *RecipeSpec) {
 			}
 		}
 	}
+	if in.Volumes != nil {
+		in, out := &in.Volumes, &out.Volumes
+		*out = new(Group)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Hooks != nil {
 		in, out := &in.Hooks, &out.Hooks
 		*out = make([]*Hook, len(*in))
@@ -247,16 +252,15 @@ func (in *RecipeSpec) DeepCopyInto(out *RecipeSpec) {
 			}
 		}
 	}
-	if in.Workflows != nil {
-		in, out := &in.Workflows, &out.Workflows
-		*out = make([]*Workflow, len(*in))
-		for i := range *in {
-			if (*in)[i] != nil {
-				in, out := &(*in)[i], &(*out)[i]
-				*out = new(Workflow)
-				(*in).DeepCopyInto(*out)
-			}
-		}
+	if in.CaptureWorkflow != nil {
+		in, out := &in.CaptureWorkflow, &out.CaptureWorkflow
+		*out = new(Workflow)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.RecoverWorkflow != nil {
+		in, out := &in.RecoverWorkflow, &out.RecoverWorkflow
+		*out = new(Workflow)
+		(*in).DeepCopyInto(*out)
 	}
 }
 

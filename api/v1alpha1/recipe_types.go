@@ -22,14 +22,19 @@ type RecipeSpec struct {
 	//+listType=map
 	//+listMapKey=name
 	Groups []*Group `json:"groups"`
+	// Volumes to protect from disaster
+	//+optional
+	Volumes *Group `json:"volumes"`
 	// List of one or multiple hooks
 	//+listType=map
 	//+listMapKey=name
 	Hooks []*Hook `json:"hooks,omitempty"`
-	// Workflow is the sequence of actions to take
-	//+listType=map
-	//+listMapKey=name
-	Workflows []*Workflow `json:"workflows"`
+	// The sequence of actions to capture data to protect from disaster
+	//+optional
+	CaptureWorkflow *Workflow `json:"captureWorkflow"`
+	// The sequence of actions to recover data protected from disaster
+	//+optional
+	RecoverWorkflow *Workflow `json:"recoverWorkflow"`
 }
 
 // Groups defined in the recipe refine / narrow-down the scope of its parent groups defined in the
@@ -70,9 +75,6 @@ type Group struct {
 
 // Workflow is the sequence of actions to take
 type Workflow struct {
-	// Name of recipe. Names "backup" and "restore" are reserved and implicitly used by default for
-	// backup or restore respectively
-	Name string `json:"name"`
 	// List of the names of groups or hooks, in the order in which they should be executed
 	// Format: <group|hook>: <group or hook name>[/<hook op>]
 	Sequence []map[string]string `json:"sequence"`

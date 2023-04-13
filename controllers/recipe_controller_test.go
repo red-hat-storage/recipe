@@ -53,8 +53,7 @@ var _ = Describe("RecipeController", func() {
 							Type: "resource",
 						},
 					},
-					Hooks:     []*Recipe.Hook{},
-					Workflows: []*Recipe.Workflow{},
+					Hooks: []*Recipe.Hook{},
 				},
 			}
 
@@ -77,8 +76,7 @@ var _ = Describe("RecipeController", func() {
 							Type: "resource",
 						},
 					},
-					Hooks:     []*Recipe.Hook{},
-					Workflows: []*Recipe.Workflow{},
+					Hooks: []*Recipe.Hook{},
 				},
 			}
 
@@ -105,7 +103,6 @@ var _ = Describe("RecipeController", func() {
 							Type: "exec",
 						},
 					},
-					Workflows: []*Recipe.Workflow{},
 				},
 			}
 
@@ -129,7 +126,6 @@ var _ = Describe("RecipeController", func() {
 							Type: "exec",
 						},
 					},
-					Workflows: []*Recipe.Workflow{},
 				},
 			}
 
@@ -164,7 +160,6 @@ var _ = Describe("RecipeController", func() {
 							Ops:  ops,
 						},
 					},
-					Workflows: []*Recipe.Workflow{},
 				},
 			}
 		}
@@ -220,7 +215,6 @@ var _ = Describe("RecipeController", func() {
 							},
 						},
 					},
-					Workflows: []*Recipe.Workflow{},
 				},
 			}
 
@@ -248,64 +242,12 @@ var _ = Describe("RecipeController", func() {
 							},
 						},
 					},
-					Workflows: []*Recipe.Workflow{},
 				},
 			}
 
 			err := k8sClient.Create(context.TODO(), recipe)
 
 			Expect(err).ToNot(BeNil())
-		})
-	})
-
-	Context("Workflows", func() {
-		It("allow unique names", func() {
-			recipe := &Recipe.Recipe{
-				TypeMeta:   metav1.TypeMeta{Kind: "Recipe", APIVersion: "ramendr.openshift.io/v1alpha1"},
-				ObjectMeta: metav1.ObjectMeta{Name: "test-recipe", Namespace: testNamespace.Name},
-				Spec: Recipe.RecipeSpec{
-					Groups: []*Recipe.Group{},
-					Hooks:  []*Recipe.Hook{},
-					Workflows: []*Recipe.Workflow{
-						{
-							Name:     "workflow-1",
-							Sequence: []map[string]string{},
-						},
-						{
-							Name:     "workflow-2",
-							Sequence: []map[string]string{},
-						},
-					},
-				},
-			}
-
-			err := k8sClient.Create(context.TODO(), recipe)
-
-			Expect(err).To(BeNil())
-		})
-		It("error on duplicate names", func() {
-			recipe := &Recipe.Recipe{
-				TypeMeta:   metav1.TypeMeta{Kind: "Recipe", APIVersion: "ramendr.openshift.io/v1alpha1"},
-				ObjectMeta: metav1.ObjectMeta{Name: "test-recipe", Namespace: testNamespace.Name},
-				Spec: Recipe.RecipeSpec{
-					Groups: []*Recipe.Group{},
-					Hooks:  []*Recipe.Hook{},
-					Workflows: []*Recipe.Workflow{
-						{
-							Name:     "workflow-1",
-							Sequence: []map[string]string{},
-						},
-						{
-							Name:     "workflow-2",
-							Sequence: []map[string]string{},
-						},
-					},
-				},
-			}
-
-			err := k8sClient.Create(context.TODO(), recipe)
-
-			Expect(err).To(BeNil())
 		})
 	})
 })
