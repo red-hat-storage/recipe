@@ -200,13 +200,13 @@ $(ENVTEST): $(LOCALBIN)
 
 .PHONY: bundle
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
-	operator-sdk generate kustomize manifests -q
+	operator-sdk generate kustomize manifests -q --interactive=false
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS)
 	operator-sdk bundle validate ./bundle
 
 .PHONY: bundle-build
-bundle-build: ## Build the bundle image.
+bundle-build: bundle ## Build the bundle image.
 	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
 
 .PHONY: bundle-push
