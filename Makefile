@@ -63,6 +63,14 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
+# SKIP_RANGE is a build time var, that provides a valid value for:
+# - olm.skipRange annotation, in the olm bundle CSV
+SKIP_RANGE ?=
+
+# REPLACES is a build time var, that provides a valid value for:
+# - spec.replaces value, in the olm bundle CSV
+REPLACES ?=
+
 .PHONY: all
 all: build
 
@@ -202,6 +210,10 @@ $(ENVTEST): $(LOCALBIN)
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
 	operator-sdk generate kustomize manifests -q --interactive=false
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	cd config/manifests/ && $(KUSTOMIZE) edit add patch --name recipe.v0.0.0 --kind ClusterServiceVersion\
+		--patch '[{"op": "add", "path": "/metadata/annotations/olm.skipRange", "value": "$(SKIP_RANGE)"}]' && \
+		$(KUSTOMIZE) edit add patch --name recipe.v0.0.0 --kind ClusterServiceVersion\
+		--patch '[{"op": "replace", "path": "/spec/replaces", "value": "$(REPLACES)"}]'
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS)
 	operator-sdk bundle validate ./bundle
 
