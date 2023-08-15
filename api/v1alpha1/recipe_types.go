@@ -69,6 +69,9 @@ type Group struct {
 	// Whether to include any cluster-scoped resources. If nil or true, cluster-scoped resources are
 	// included if they are associated with the included namespace-scoped resources
 	IncludeClusterResources *bool `json:"includeClusterResources,omitempty"`
+	// List of namespaces to include.
+	//+optional
+	IncludedNamespaces []string `json:"includedNamespaces,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
 }
@@ -88,6 +91,9 @@ type Workflow struct {
 type Hook struct {
 	// Hook name, unique within the Recipe CR
 	Name string `json:"name"`
+	// Namespace
+	//+optional
+	Namespace string `json:"namespace,omitempty"`
 	// Hook type
 	// +kubebuilder:validation:Enum=exec;scale;check
 	Type string `json:"type"`
