@@ -69,6 +69,11 @@ func (in *Group) DeepCopyInto(out *Group) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.IncludedNamespaces != nil {
+		in, out := &in.IncludedNamespaces, &out.IncludedNamespaces
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Essential != nil {
 		in, out := &in.Essential, &out.Essential
 		*out = new(bool)
