@@ -21,6 +21,7 @@ type RecipeSpec struct {
 	// List of one or multiple groups
 	//+listType=map
 	//+listMapKey=name
+	//+optional
 	Groups []*Group `json:"groups"`
 	// Volumes to protect from disaster
 	//+optional
