@@ -35,6 +35,9 @@ IMAGE_TAG_BASE ?= openshift.io/recipe
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
 BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 
+# CRD_BUNDLE_IMG defines the image:tag used for the crd bundle.
+CRD_BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-crd-bundle:v$(VERSION)
+
 # BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
 BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 
@@ -229,13 +232,39 @@ bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metada
 	$(KUSTOMIZE) build config/manifests | $(OSDK) generate bundle $(BUNDLE_GEN_FLAGS)
 	$(OSDK) bundle validate ./bundle
 
+# We need to bundle just the CRDs so that we can include the recipe CRD as a
+# dependency in the ODF operator. This will ensure that we have the recipe CRD
+# installed in the system when users create the applications.
+.PHONY: crd-bundle
+crd-bundle: manifests kustomize operator-sdk ## Generate bundle manifests for CRDs only and metadata, then validate generated files.
+	$(OSDK) generate kustomize manifests -q \
+			--interactive=false \
+			--input-dir config/manifests-crd \
+			--output-dir config/manifests-crd
+	cd config/manifests-crd/ && \
+		$(KUSTOMIZE) edit add patch --name recipe.v0.0.0 --kind ClusterServiceVersion \
+		--patch '[{"op": "add", "path": "/metadata/annotations/olm.skipRange", "value": "$(SKIP_RANGE)"}]' && \
+		$(KUSTOMIZE) edit add patch --name recipe.v0.0.0 --kind ClusterServiceVersion \
+		--patch '[{"op": "replace", "path": "/spec/replaces", "value": "$(REPLACES)"}]'
+	$(KUSTOMIZE) build config/manifests-crd | $(OSDK) generate bundle $(BUNDLE_GEN_FLAGS)
+	$(OSDK) bundle validate ./bundle
+
+
 .PHONY: bundle-build
 bundle-build: bundle ## Build the bundle image.
 	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
 
+.PHONY: crd-bundle-build
+crd-bundle-build: crd-bundle ## Build the crd bundle image.
+	docker build -f bundle.Dockerfile -t $(CRD_BUNDLE_IMG) .
+
 .PHONY: bundle-push
 bundle-push: ## Push the bundle image.
 	$(MAKE) docker-push IMG=$(BUNDLE_IMG)
+
+.PHONY: crd-bundle-push
+crd-bundle-push: ## Push the bundle image.
+	$(MAKE) docker-push IMG=$(CRD_BUNDLE_IMG)
 
 .PHONY: opm
 OPM = ./bin/opm
