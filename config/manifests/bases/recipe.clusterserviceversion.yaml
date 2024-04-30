@@ -1,0 +1,49 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: recipe.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: Recipe is the Schema for the recipes API
+      displayName: Recipe
+      kind: Recipe
+      name: recipes.ramendr.openshift.io
+      version: v1alpha1
+  description: Recipe description. TODO.
+  displayName: Recipe
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - recipe
+  links:
+  - name: Recipe
+    url: https://github.com/ramendr/recipe
+  maintainers:
+  - email: bmekhiss@redhat.com
+    name: Benamar Mekhissi
+  - email: srangana@redhat.com
+    name: Shyam Ranganathan
+  maturity: alpha
+  provider:
+    name: Red Hat, Inc.
+  version: 0.0.0
