@@ -15,7 +15,10 @@ spec:
       kind: Recipe
       name: recipes.ramendr.openshift.io
       version: v1alpha1
-  description: Recipe description. TODO.
+  description: >
+    Recipe describes a workflow used for a capturing or recovering
+    Kubernetes resources. This can be referred to by a Ramen DRPlacementControl
+    object when kubeObjectProtection is enabled.
   displayName: Recipe
   icon:
   - base64data: ""
