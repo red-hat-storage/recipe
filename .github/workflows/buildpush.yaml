@@ -1,0 +1,62 @@
+---
+name: Build and push container images
+
+on:
+  push:
+
+env:
+  IMAGE_REGISTRY: ${{ vars.IMAGE_REGISTRY || 'quay.io' }}
+  IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY || 'ramendr' }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME || 'recipe' }}
+  IMAGE_TAG: "latest"
+  GO_VERSION: "1.19"
+  DOCKERCMD: "podman"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-and-push-image:
+    name: Build image
+    runs-on: ubuntu-latest
+    if:  vars.PUBLISH_IMAGES == 'true'
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Login to Quay
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+
+      - name: Determine image tag
+        run: |
+          [[ "${{ github.ref }}" =~ ^refs\/(heads|tags)\/(release-)?(.*) ]]
+          echo "heads or tags? ${BASH_REMATCH[1]}"
+          echo "release? ${BASH_REMATCH[2]}"
+          echo "version? ${BASH_REMATCH[3]}"
+          TAG=""
+          if test "${BASH_REMATCH[1]}" = "heads"; then
+            if test "${BASH_REMATCH[2]}" = "" && test "${BASH_REMATCH[3]}" = "main"; then
+              TAG="latest"
+            elif test "${BASH_REMATCH[2]}" = "release-"; then
+              TAG="${BASH_REMATCH[3]}-latest"
+            fi
+          elif test "${BASH_REMATCH[1]}" == "tags" && test "${BASH_REMATCH[2]}" = ""; then
+            TAG="${BASH_REMATCH[3]}"
+          fi
+          test "${TAG}" = "" && exit 1
+          echo "IMAGE_TAG is ${TAG}"
+          echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
+
+      - name: Build and push crd bundle images to Quay
+        run: |
+          make crd-bundle-build crd-bundle-push
