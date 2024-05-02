@@ -78,6 +78,8 @@ SKIP_RANGE ?=
 # - spec.replaces value, in the olm bundle CSV
 REPLACES ?=
 
+DOCKERCMD ?= docker
+
 .PHONY: all
 all: build
 
@@ -135,11 +137,11 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: test ## Build docker image with the manager.
-	docker build -t ${IMG} .
+	$(DOCKERCMD) build -t ${IMG} .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
-	docker push ${IMG}
+	$(DOCKERCMD) push ${IMG}
 
 # PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
 # architectures. (i.e. make docker-buildx IMG=myregistry/mypoperator:0.0.1). To use this option you need to:
@@ -252,11 +254,11 @@ crd-bundle: manifests kustomize operator-sdk ## Generate bundle manifests for CR
 
 .PHONY: bundle-build
 bundle-build: bundle ## Build the bundle image.
-	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+	$(DOCKERCMD) build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
 
 .PHONY: crd-bundle-build
 crd-bundle-build: crd-bundle ## Build the crd bundle image.
-	docker build -f bundle.Dockerfile -t $(CRD_BUNDLE_IMG) .
+	$(DOCKERCMD) build -f bundle.Dockerfile -t $(CRD_BUNDLE_IMG) .
 
 .PHONY: bundle-push
 bundle-push: ## Push the bundle image.
@@ -300,7 +302,12 @@ endif
 # https://github.com/operator-framework/community-operators/blob/7f1438c/docs/packaging-operator.md#updating-your-existing-operator
 .PHONY: catalog-build
 catalog-build: opm ## Build a catalog image.
-	$(OPM) index add --container-tool docker --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
+	$(OPM) index add \
+		--container-tool $(DOCKERCMD) \
+		--mode semver \
+		--tag $(CATALOG_IMG) \
+		--bundles $(BUNDLE_IMGS) \
+		$(FROM_INDEX_OPT)
 
 # Push the catalog image.
 .PHONY: catalog-push
