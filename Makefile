@@ -78,7 +78,7 @@ SKIP_RANGE ?=
 # - spec.replaces value, in the olm bundle CSV
 REPLACES ?=
 
-DOCKERCMD ?= docker
+DOCKERCMD ?= podman
 
 .PHONY: all
 all: build
@@ -152,6 +152,7 @@ docker-push: ## Push docker image with the manager.
 PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
 .PHONY: docker-buildx
 docker-buildx: test ## Build and push docker image for the manager for cross-platform support
+ifeq ($(DOCKERCMD),docker)
 	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
 	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
 	- docker buildx create --name project-v3-builder
@@ -159,6 +160,9 @@ docker-buildx: test ## Build and push docker image for the manager for cross-pla
 	- docker buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross
 	- docker buildx rm project-v3-builder
 	rm Dockerfile.cross
+else
+	@echo "docker-buildx is supported only with docker"
+endif
 
 ##@ Deployment
 
