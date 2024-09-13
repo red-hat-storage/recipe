@@ -122,7 +122,6 @@ type Hook struct {
 	// +kubebuilder:validation:Enum=exec;scale;check
 	Type string `json:"type"`
 	// Resource type to that a hook applies to
-	// +kubebuilder:validation:Enum=pod;deployment;statefulset
 	SelectResource string `json:"selectResource,omitempty"`
 	// If specified, resource object needs to match this label selector
 	//+optional
