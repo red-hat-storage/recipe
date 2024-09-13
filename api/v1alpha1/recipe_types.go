@@ -82,8 +82,18 @@ type Group struct {
 	IncludedNamespaces []string `json:"includedNamespaces,omitempty"`
 	// List of namespace to exclude
 	ExcludedNamespaces []string `json:"excludedNamespaces,omitempty"`
+	// RestoreStatus restores status if set to all the includedResources specified. Specify '*' to restore all statuses for all the CRs
+	RestoreStatus *GroupRestoreStatus `json:"restoreStatus,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
+}
+
+// GroupRestoreStatus is within resource groups which instructs velero to restore status for specified resources types, * would mean all
+type GroupRestoreStatus struct {
+	// List of resource types to include. If unspecified, all resource types are included.
+	IncludedResources []string `json:"includedResources,omitempty"`
+	// List of resource types to exclude.
+	ExcludedResources []string `json:"excludedResources,omitempty"`
 }
 
 // Workflow is the sequence of actions to take
