@@ -117,8 +117,7 @@ type Hook struct {
 	// Hook name, unique within the Recipe CR
 	Name string `json:"name"`
 	// Namespace
-	//+optional
-	Namespace string `json:"namespace,omitempty"`
+	Namespace string `json:"namespace"`
 	// Hook type
 	// +kubebuilder:validation:Enum=exec;scale;check
 	Type string `json:"type"`
