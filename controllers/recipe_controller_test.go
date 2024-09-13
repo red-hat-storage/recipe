@@ -133,20 +133,19 @@ var _ = Describe("RecipeController", func() {
 
 			Expect(err).ToNot(BeNil())
 		})
-		echoCommand := func(s string) []string {
-			return []string{"/bin/sh", "-c", "echo", s}
-		}
-		emptyCommand := func(string) []string {
-			return []string{}
-		}
-		hookOps := func(command func(string) []string, opNames ...string) []*Recipe.Operation {
-			ops := make([]*Recipe.Operation, len(opNames))
-			for i, opName := range opNames {
-				ops[i] = &Recipe.Operation{Name: opName, Command: command(opName)}
-			}
 
-			return ops
+		echoCommandTemplate := "/bin/sh/ -c echo"
+		emptyCommandTemplate := ""
+
+		commandGenerator := func(commandTemplate, suffix string) string {
+			return commandTemplate + suffix
 		}
+
+		appendOp := func(ops []*Recipe.Operation, opName, commandTemplate, suffix string) []*Recipe.Operation {
+			op := &Recipe.Operation{Name: opName, Command: commandGenerator(commandTemplate, suffix)}
+			return append(ops, op)
+		}
+
 		hookOpsRecipe := func(ops []*Recipe.Operation) *Recipe.Recipe {
 			return &Recipe.Recipe{
 				TypeMeta:   metav1.TypeMeta{Kind: "Recipe", APIVersion: "ramendr.openshift.io/v1alpha1"},
@@ -164,17 +163,21 @@ var _ = Describe("RecipeController", func() {
 			}
 		}
 		It("error on empty command", func() {
-			recipe := hookOpsRecipe(hookOps(emptyCommand, "op-1"))
+			ops := []*Recipe.Operation{}
+
+			ops = appendOp(ops, "op-1", emptyCommandTemplate, "")
+
+			recipe := hookOpsRecipe(ops)
 			Expect(k8sClient.Create(context.TODO(), recipe)).To(MatchError(func() *errors.StatusError {
 				path := field.NewPath("spec", "hooks[0]", "ops[0]", "command")
-				value := 0
+				value := ""
 
 				return errors.NewInvalid(
 					schema.GroupKind{Group: Recipe.GroupVersion.Group, Kind: "Recipe"},
 					recipe.Name,
 					field.ErrorList{
 						field.Invalid(
-							path, value, validationErrors.TooFewItems(
+							path, value, validationErrors.TooShort(
 								path.String(),
 								"body",
 								1,
@@ -186,12 +189,22 @@ var _ = Describe("RecipeController", func() {
 			}()))
 		})
 		It("allow unique Ops names", func() {
-			err := k8sClient.Create(context.TODO(), hookOpsRecipe(hookOps(echoCommand, "op-1", "op-2")))
+			ops := []*Recipe.Operation{}
+
+			ops = appendOp(ops, "op-1", echoCommandTemplate, "aaa")
+			ops = appendOp(ops, "op-2", echoCommandTemplate, "bbb")
+
+			err := k8sClient.Create(context.TODO(), hookOpsRecipe(ops))
 
 			Expect(err).To(BeNil())
 		})
 		It("error on duplicate Ops names", func() {
-			err := k8sClient.Create(context.TODO(), hookOpsRecipe(hookOps(echoCommand, "op-1", "op-1")))
+			ops := []*Recipe.Operation{}
+
+			ops = appendOp(ops, "op-1", echoCommandTemplate, "aaa")
+			ops = appendOp(ops, "op-1", echoCommandTemplate, "bbb")
+
+			err := k8sClient.Create(context.TODO(), hookOpsRecipe(ops))
 
 			Expect(err).ToNot(BeNil())
 		})

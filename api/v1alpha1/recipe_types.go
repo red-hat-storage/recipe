@@ -156,8 +156,8 @@ type Operation struct {
 	// The container where the command should be executed
 	Container string `json:"container,omitempty"`
 	// The command to execute
-	//+kubebuilder:validation:MinItems=1
-	Command []string `json:"command"`
+	//+kubebuilder:validation:MinLength=1
+	Command string `json:"command"`
 	// How to handle command returning with non-zero exit code. Defaults to Fail.
 	OnError string `json:"onError,omitempty"`
 	// How long to wait for the command to execute, in seconds
