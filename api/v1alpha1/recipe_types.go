@@ -80,6 +80,8 @@ type Group struct {
 	// List of namespaces to include.
 	//+optional
 	IncludedNamespaces []string `json:"includedNamespaces,omitempty"`
+	// List of namespace to exclude
+	ExcludedNamespaces []string `json:"excludedNamespaces,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
 }
