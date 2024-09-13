@@ -86,6 +86,8 @@ type Group struct {
 	RestoreStatus *GroupRestoreStatus `json:"restoreStatus,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
+	// Whether to overwrite resources during restore. Default to false.
+	RestoreOverwriteResources *bool `json:"restoreOverwriteResources,omitempty"`
 }
 
 // GroupRestoreStatus is within resource groups which instructs velero to restore status for specified resources types, * would mean all
