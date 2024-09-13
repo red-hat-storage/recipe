@@ -10,6 +10,14 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+const (
+	BackupWorkflowName  string = "backup"
+	RestoreWorkflowName string = "restore"
+
+	// TODO
+	// Do we want to add capture and recover workflows?
+)
+
 // RecipeSpec defines the desired state of Recipe
 type RecipeSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -30,12 +38,9 @@ type RecipeSpec struct {
 	//+listType=map
 	//+listMapKey=name
 	Hooks []*Hook `json:"hooks,omitempty"`
-	// The sequence of actions to capture data to protect from disaster
+	// Workflow is the sequence of actions to take
 	//+optional
-	CaptureWorkflow *Workflow `json:"captureWorkflow"`
-	// The sequence of actions to recover data protected from disaster
-	//+optional
-	RecoverWorkflow *Workflow `json:"recoverWorkflow"`
+	Workflows []*Workflow `json:"workflows"`
 }
 
 // Groups defined in the recipe refine / narrow-down the scope of its parent groups defined in the
@@ -79,6 +84,9 @@ type Group struct {
 
 // Workflow is the sequence of actions to take
 type Workflow struct {
+	// Name of recipe. Names "backup" and "restore" are reserved and implicitly used by default for
+	// backup or restore respectively
+	Name string `json:"name"`
 	// List of the names of groups or hooks, in the order in which they should be executed
 	// Format: <group|hook>: <group or hook name>[/<hook op>]
 	Sequence []map[string]string `json:"sequence"`
