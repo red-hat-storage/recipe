@@ -75,6 +75,8 @@ type Group struct {
 	// Whether to include any cluster-scoped resources. If nil or true, cluster-scoped resources are
 	// included if they are associated with the included namespace-scoped resources
 	IncludeClusterResources *bool `json:"includeClusterResources,omitempty"`
+	// Selects namespaces by label
+	IncludedNamespacesByLabel *metav1.LabelSelector `json:"includedNamespacesByLabel,omitempty"`
 	// List of namespaces to include.
 	//+optional
 	IncludedNamespaces []string `json:"includedNamespaces,omitempty"`
