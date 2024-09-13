@@ -135,10 +135,8 @@ type Hook struct {
 	// +kubebuilder:validation:Enum=fail;continue
 	// +kubebuilder:default=fail
 	OnError string `json:"onError,omitempty"`
-	// Default timeout applied to custom and built-in operations. If not specified, equals to 30s.
-	//+kubebuilder:validation:Format=duration
-	//+optional
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// Default timeout in seconds applied to custom and built-in operations. If not specified, equals to 30s.
+	Timeout int `json:"timeout,omitempty"`
 	// Set of operations that the hook can be invoked for
 	//+listType=map
 	//+listMapKey=name
@@ -162,10 +160,8 @@ type Operation struct {
 	Command []string `json:"command"`
 	// How to handle command returning with non-zero exit code. Defaults to Fail.
 	OnError string `json:"onError,omitempty"`
-	// How long to wait for the command to execute
-	//+kubebuilder:validation:Format=duration
-	//+optional
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// How long to wait for the command to execute, in seconds
+	Timeout int `json:"timeout,omitempty"`
 	// Name of another operation that reverts the effect of this operation (e.g. quiesce vs. unquiesce)
 	InverseOp string `json:"inverseOp,omitempty"`
 }
@@ -178,10 +174,8 @@ type Check struct {
 	Condition string `json:"condition,omitempty"`
 	// How to handle when check does not become true. Defaults to Fail.
 	OnError string `json:"onError,omitempty"`
-	// How long to wait for the check to execute
-	//+kubebuilder:validation:Format=duration
-	//+optional
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// How long to wait for the check to execute, in seconds
+	Timeout int `json:"timeout,omitempty"`
 }
 
 // RecipeStatus defines the observed state of Recipe
