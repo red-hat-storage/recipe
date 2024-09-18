@@ -10,6 +10,14 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+const (
+	BackupWorkflowName  string = "backup"
+	RestoreWorkflowName string = "restore"
+
+	// TODO
+	// Do we want to add capture and recover workflows?
+)
+
 // RecipeSpec defines the desired state of Recipe
 type RecipeSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -30,12 +38,9 @@ type RecipeSpec struct {
 	//+listType=map
 	//+listMapKey=name
 	Hooks []*Hook `json:"hooks,omitempty"`
-	// The sequence of actions to capture data to protect from disaster
+	// Workflow is the sequence of actions to take
 	//+optional
-	CaptureWorkflow *Workflow `json:"captureWorkflow"`
-	// The sequence of actions to recover data protected from disaster
-	//+optional
-	RecoverWorkflow *Workflow `json:"recoverWorkflow"`
+	Workflows []*Workflow `json:"workflows"`
 }
 
 // Groups defined in the recipe refine / narrow-down the scope of its parent groups defined in the
@@ -70,15 +75,34 @@ type Group struct {
 	// Whether to include any cluster-scoped resources. If nil or true, cluster-scoped resources are
 	// included if they are associated with the included namespace-scoped resources
 	IncludeClusterResources *bool `json:"includeClusterResources,omitempty"`
+	// Selects namespaces by label
+	IncludedNamespacesByLabel *metav1.LabelSelector `json:"includedNamespacesByLabel,omitempty"`
 	// List of namespaces to include.
 	//+optional
 	IncludedNamespaces []string `json:"includedNamespaces,omitempty"`
+	// List of namespace to exclude
+	ExcludedNamespaces []string `json:"excludedNamespaces,omitempty"`
+	// RestoreStatus restores status if set to all the includedResources specified. Specify '*' to restore all statuses for all the CRs
+	RestoreStatus *GroupRestoreStatus `json:"restoreStatus,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
+	// Whether to overwrite resources during restore. Default to false.
+	RestoreOverwriteResources *bool `json:"restoreOverwriteResources,omitempty"`
+}
+
+// GroupRestoreStatus is within resource groups which instructs velero to restore status for specified resources types, * would mean all
+type GroupRestoreStatus struct {
+	// List of resource types to include. If unspecified, all resource types are included.
+	IncludedResources []string `json:"includedResources,omitempty"`
+	// List of resource types to exclude.
+	ExcludedResources []string `json:"excludedResources,omitempty"`
 }
 
 // Workflow is the sequence of actions to take
 type Workflow struct {
+	// Name of recipe. Names "backup" and "restore" are reserved and implicitly used by default for
+	// backup or restore respectively
+	Name string `json:"name"`
 	// List of the names of groups or hooks, in the order in which they should be executed
 	// Format: <group|hook>: <group or hook name>[/<hook op>]
 	Sequence []map[string]string `json:"sequence"`
@@ -93,13 +117,11 @@ type Hook struct {
 	// Hook name, unique within the Recipe CR
 	Name string `json:"name"`
 	// Namespace
-	//+optional
-	Namespace string `json:"namespace,omitempty"`
+	Namespace string `json:"namespace"`
 	// Hook type
 	// +kubebuilder:validation:Enum=exec;scale;check
 	Type string `json:"type"`
 	// Resource type to that a hook applies to
-	// +kubebuilder:validation:Enum=pod;deployment;statefulset
 	SelectResource string `json:"selectResource,omitempty"`
 	// If specified, resource object needs to match this label selector
 	//+optional
@@ -113,10 +135,8 @@ type Hook struct {
 	// +kubebuilder:validation:Enum=fail;continue
 	// +kubebuilder:default=fail
 	OnError string `json:"onError,omitempty"`
-	// Default timeout applied to custom and built-in operations. If not specified, equals to 30s.
-	//+kubebuilder:validation:Format=duration
-	//+optional
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// Default timeout in seconds applied to custom and built-in operations. If not specified, equals to 30s.
+	Timeout int `json:"timeout,omitempty"`
 	// Set of operations that the hook can be invoked for
 	//+listType=map
 	//+listMapKey=name
@@ -136,14 +156,12 @@ type Operation struct {
 	// The container where the command should be executed
 	Container string `json:"container,omitempty"`
 	// The command to execute
-	//+kubebuilder:validation:MinItems=1
-	Command []string `json:"command"`
+	//+kubebuilder:validation:MinLength=1
+	Command string `json:"command"`
 	// How to handle command returning with non-zero exit code. Defaults to Fail.
 	OnError string `json:"onError,omitempty"`
-	// How long to wait for the command to execute
-	//+kubebuilder:validation:Format=duration
-	//+optional
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// How long to wait for the command to execute, in seconds
+	Timeout int `json:"timeout,omitempty"`
 	// Name of another operation that reverts the effect of this operation (e.g. quiesce vs. unquiesce)
 	InverseOp string `json:"inverseOp,omitempty"`
 }
@@ -156,10 +174,8 @@ type Check struct {
 	Condition string `json:"condition,omitempty"`
 	// How to handle when check does not become true. Defaults to Fail.
 	OnError string `json:"onError,omitempty"`
-	// How long to wait for the check to execute
-	//+kubebuilder:validation:Format=duration
-	//+optional
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
+	// How long to wait for the check to execute, in seconds
+	Timeout int `json:"timeout,omitempty"`
 }
 
 // RecipeStatus defines the observed state of Recipe
