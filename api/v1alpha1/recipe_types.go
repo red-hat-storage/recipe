@@ -39,6 +39,8 @@ type RecipeSpec struct {
 	//+listMapKey=name
 	Hooks []*Hook `json:"hooks,omitempty"`
 	// Workflow is the sequence of actions to take
+	//+listType=map
+	//+listMapKey=name
 	//+optional
 	Workflows []*Workflow `json:"workflows"`
 }
