@@ -149,6 +149,9 @@ type Hook struct {
 	Chks []*Check `json:"chks,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
+	// Flag to skip a Hook.
+	// +kubebuilder:default=false
+	SkipHookIfNotPresent bool `json:"skipHookIfNotPresent,omitempty"`
 }
 
 // Operation to be invoked by the hook
