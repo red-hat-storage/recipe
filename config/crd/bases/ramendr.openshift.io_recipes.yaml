@@ -385,6 +385,10 @@ spec:
                         Boolean flag that indicates whether to execute command on a single pod or on all pods that
                         match the selector
                       type: boolean
+                    skipHookIfNotPresent:
+                      default: false
+                      description: Flag to skip a Hook.
+                      type: boolean
                     timeout:
                       description: Default timeout in seconds applied to custom and
                         built-in operations. If not specified, equals to 30s.
