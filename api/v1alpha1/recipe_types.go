@@ -124,7 +124,7 @@ type Hook struct {
 	// Namespace
 	Namespace string `json:"namespace"`
 	// Hook type
-	// +kubebuilder:validation:Enum=exec;scale;check
+	// +kubebuilder:validation:Enum=exec;scale;check;job
 	Type string `json:"type"`
 	// Resource type to that a hook applies to
 	SelectResource string `json:"selectResource,omitempty"`
