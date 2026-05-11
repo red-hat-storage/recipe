@@ -429,6 +429,7 @@ spec:
                       - exec
                       - scale
                       - check
+                      - job
                       type: string
                   required:
                   - name
