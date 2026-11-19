@@ -38,6 +38,9 @@ type RecipeSpec struct {
 	//+listType=map
 	//+listMapKey=name
 	Hooks []*Hook `json:"hooks,omitempty"`
+	// List of jobs
+	//+optional
+	Jobs []map[string]*string `json:"jobs,omitempty"`
 	// Workflow is the sequence of actions to take
 	//+listType=map
 	//+listMapKey=name
@@ -121,7 +124,7 @@ type Hook struct {
 	// Namespace
 	Namespace string `json:"namespace"`
 	// Hook type
-	// +kubebuilder:validation:Enum=exec;scale;check
+	// +kubebuilder:validation:Enum=exec;scale;check;job
 	Type string `json:"type"`
 	// Resource type to that a hook applies to
 	SelectResource string `json:"selectResource,omitempty"`
@@ -149,6 +152,8 @@ type Hook struct {
 	Chks []*Check `json:"chks,omitempty"`
 	// Defaults to true, if set to false, a failure is not necessarily handled as fatal
 	Essential *bool `json:"essential,omitempty"`
+	// List of Jobs
+	Jobs []*JobDetails `json:"jobs,omitempty"`
 	// Flag to skip a Hook.
 	// +kubebuilder:default=false
 	SkipHookIfNotPresent bool `json:"skipHookIfNotPresent,omitempty"`
@@ -181,6 +186,21 @@ type Check struct {
 	OnError string `json:"onError,omitempty"`
 	// How long to wait for the check to execute, in seconds
 	Timeout int `json:"timeout,omitempty"`
+}
+
+// Details of a Job
+type JobDetails struct {
+	// Name of the job. Should be unique from list of available jobs
+	Name string `json:"name"`
+	// How to handle command returning with non-zero exit code. Defaults to Fail.
+	OnError string `json:"onError,omitempty"`
+	// How long to wait for the command to execute, in seconds
+	Timeout int `json:"timeout,omitempty"`
+	// Name of another operation that reverts the effect of this operation (e.g. quiesce vs. unquiesce)
+	InverseOp string `json:"inverseOp,omitempty"`
+	// Whether to create the Job or not if it already exists. Default to false.
+	// +kubebuilder:default:=false
+	ForceCreate *bool `json:"forceCreate,omitempty"`
 }
 
 // RecipeStatus defines the observed state of Recipe
